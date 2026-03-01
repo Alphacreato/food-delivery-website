@@ -59,14 +59,24 @@ const Header = () => {
   };
 
   const handleNavClick = (e: React.MouseEvent, item: (typeof menuItems)[0]) => {
-    if (!item.href.includes("#")) return;
-    e.preventDefault();
-    const [path, hash] = item.href.split("#");
-    const isCurrentPage = location.pathname === (path || "/");
-    if (isCurrentPage) {
-      scrollToSection("#" + hash);
+    if (item.href.includes("#")) {
+      e.preventDefault();
+      const [path, hash] = item.href.split("#");
+      const isCurrentPage = location.pathname === (path || "/");
+      if (isCurrentPage) {
+        navigate(path + "#" + hash, { replace: true });
+        scrollToSection("#" + hash);
+      } else {
+        navigate(path + "#" + hash);
+      }
     } else {
-      navigate(path + "#" + hash);
+      // No hash — if same page with a hash active, clear it and scroll to top
+      const isCurrentPage = location.pathname === item.href;
+      if (isCurrentPage && location.hash) {
+        e.preventDefault();
+        navigate(item.href, { replace: true });
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
     }
     setIsMenuOpen(false);
   };
@@ -77,8 +87,9 @@ const Header = () => {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        style={{ paddingTop: "env(safe-area-inset-top)" }}
-        className={`fixed w-full top-0 z-50 transition-all duration-300 ${
+        className={`fixed w-full top-0 transition-all duration-300 ${
+          isMenuOpen ? "z-30" : "z-50"
+        } ${
           isScrolled
             ? "bg-white/80 backdrop-blur-xl shadow-sm border-b border-[#2C5E2E]/10"
             : "bg-transparent"
@@ -198,14 +209,13 @@ const Header = () => {
 
       </motion.header>
 
-      {/* ─── Mobile Drawer — rendered outside motion.header so backdrop-filter works on all pages ─── */}
+      {/* ─── Mobile Drawer (outside motion.header to avoid compositing layer trapping backdrop-filter) ─── */}
       <AnimatePresence>
         {isMenuOpen && (
           <>
             {/* Backdrop */}
             <motion.div
-              className="fixed inset-0 bg-black/50 z-[55]"
-              style={{ backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -217,35 +227,37 @@ const Header = () => {
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 28, stiffness: 300 }}
-              className="fixed top-0 right-0 h-screen w-[80%] sm:w-[58%] z-[60] flex flex-col bg-[#1A3F1C] shadow-2xl"
-              style={{ paddingTop: "env(safe-area-inset-top)" }}
+              transition={{ type: "spring", damping: 26, stiffness: 280 }}
+              className="fixed top-0 right-0 h-screen w-[78%] sm:w-[60%] z-50 flex flex-col bg-[#1A3F1C] shadow-2xl"
             >
               {/* Drawer header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
+              <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
                 <Link
                   to="/"
                   onClick={() => { setIsMenuOpen(false); window.scrollTo({ top: 0, behavior: "instant" }); }}
                   className="flex items-center gap-2.5"
                 >
-                  <div className="w-9 h-9 bg-[#FFC727]/20 rounded-xl flex items-center justify-center border border-[#FFC727]/30">
-                    <img src="/images/ounje-logo.png" alt="Ounje" className="w-5 h-5 object-contain" />
+                  <div className="w-8 h-8 bg-white/15 rounded-xl flex items-center justify-center">
+                    <img
+                      src="/images/ounje-logo.png"
+                      alt="Ounje"
+                      className="w-5 h-5 object-contain"
+                    />
                   </div>
-                  <div>
-                    <p className="text-white font-extrabold text-sm uppercase tracking-widest leading-none">OunjeFood</p>
-                    <p className="text-white/40 text-[10px] mt-0.5">Order Fast. Eat Fresh.</p>
-                  </div>
+                  <span className="text-white font-extrabold text-base uppercase tracking-wide">
+                    OunjeFood
+                  </span>
                 </Link>
                 <button
                   onClick={() => setIsMenuOpen(false)}
                   className="w-9 h-9 bg-white/10 hover:bg-white/20 rounded-xl flex items-center justify-center transition"
                 >
-                  <X className="w-4 h-4 text-white" />
+                  <X className="w-5 h-5 text-white" />
                 </button>
               </div>
 
               {/* Nav links */}
-              <nav className="px-4 py-6 space-y-1 overflow-y-auto">
+              <nav className="flex-1 px-5 py-8 space-y-1.5 overflow-y-auto">
                 {menuItems.map((item, i) => {
                   const [itemPath, itemHash] = item.href.split("#");
                   const path = itemPath || "/";
@@ -255,9 +267,9 @@ const Header = () => {
                   return (
                     <motion.div
                       key={item.label}
-                      initial={{ opacity: 0, x: 24 }}
+                      initial={{ opacity: 0, x: 30 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.22, delay: 0.05 * i }}
+                      transition={{ duration: 0.25, delay: 0.06 * i }}
                     >
                       <Link
                         to={item.href}
@@ -265,31 +277,32 @@ const Header = () => {
                           handleNavClick(e, item);
                           setIsMenuOpen(false);
                         }}
-                        className={`flex items-center justify-between w-full px-4 py-4 rounded-2xl text-[15px] font-semibold transition-all ${
+                        className={`flex items-center justify-between w-full px-4 py-3.5 rounded-2xl text-base font-semibold transition ${
                           isActive
-                            ? "bg-[#FFC727]/15 text-[#FFC727] border border-[#FFC727]/20"
-                            : "text-white/75 hover:bg-white/[0.08] hover:text-white"
+                            ? "bg-white/15 text-[#FFC727]"
+                            : "text-white/80 hover:bg-white/10 hover:text-white"
                         }`}
                       >
-                        <span>{item.label}</span>
-                        <ChevronDown className={`w-4 h-4 -rotate-90 transition ${isActive ? "text-[#FFC727]" : "text-white/30"}`} />
+                        {item.label}
+                        {isActive && (
+                          <span className="w-2 h-2 bg-[#FFC727] rounded-full" />
+                        )}
                       </Link>
                     </motion.div>
                   );
                 })}
 
-                {/* Location picker — sits right below nav items */}
+                {/* Location picker */}
                 <motion.div
-                  initial={{ opacity: 0, x: 24 }}
+                  initial={{ opacity: 0, x: 30 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.22, delay: 0.05 * menuItems.length }}
-                  className="pt-3 mt-1 border-t border-white/10"
+                  transition={{ duration: 0.25, delay: 0.06 * menuItems.length }}
+                  className="flex items-center gap-2 bg-white/10 rounded-2xl px-4 py-3 mt-2"
                 >
-                  <p className="text-white/40 text-[10px] font-semibold uppercase tracking-widest px-1 mb-2">Select City</p>
+                  <MapPin className="w-4 h-4 text-[#FFC727] flex-shrink-0" />
                   <Select defaultValue="">
-                    <SelectTrigger className="w-full bg-[#FFC727] border-none rounded-2xl px-4 py-3 flex items-center gap-2 shadow-lg focus:ring-0">
-                      <MapPin className="w-4 h-4 text-[#1A3F1C] flex-shrink-0" />
-                      <SelectValue placeholder={<span className="text-[#1A3F1C] font-bold text-sm">Pick your city</span>} />
+                    <SelectTrigger className="flex-1 bg-transparent border-none shadow-none text-white text-sm font-semibold focus:ring-0 p-0">
+                      <SelectValue placeholder="Select Location" />
                     </SelectTrigger>
                     <SelectContent
                       className="bg-[#1A3F1C] border border-white/20 rounded-2xl shadow-xl z-[70]"

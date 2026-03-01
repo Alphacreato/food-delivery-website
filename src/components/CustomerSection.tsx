@@ -90,59 +90,54 @@ const CustomerSection = () => {
           initial={{ opacity: 0, x: 40 }}
           animate={isInView ? { opacity: 1, x: 0 } : {}}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="md:w-1/2 relative h-[320px] md:h-[480px] w-full"
+          className="md:w-1/2 relative h-[400px] md:h-[500px] w-full"
         >
           {/* Background blob */}
-          <motion.div
-            animate={{ scale: [1, 1.05, 1] }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute inset-0 bg-[#FFC727]/20 rounded-full blur-3xl scale-75"
-          />
+          <div className="absolute w-full h-full bg-yellow-300 rounded-full z-0 blur-2xl opacity-20" />
 
-          {/* Monitor — behind the arm */}
+          {/* Monitor */}
           <img
             src="/icons/monitor.png"
             alt="Monitor"
-            className="absolute bottom-0 left-[5%] z-10 w-48 md:w-72 lg:w-80 object-contain"
+            className="absolute w-64 md:w-80 z-20 left-1/5 bottom-0 lg:h-[228px] lg:w-[400px]"
           />
 
-          {/* Arm — slides out from monitor screen horizontally, holds, slides back in */}
+          {/* Arm — behind monitor (z-10), slides right so box emerges from screen edge */}
           <motion.img
             src="/icons/arm.png"
             alt="Arm with box"
-            initial={{ x: -100, opacity: 0 }}
+            initial={{ x: 0, opacity: 0 }}
             animate={isInView ? {
-              x: [-100, 0, 0, 0],
-              opacity: [0, 1, 1, 0],
-            } : { x: -100, opacity: 0 }}
+              x: [0, 80, 80, 0],
+              opacity: [0, 1, 0, 0],
+            } : { x: 0, opacity: 0 }}
             transition={{
-              duration: 6,
+              duration: 5,
               repeat: Infinity,
               ease: "easeInOut",
-              times: [0],
-              repeatDelay: 0,
+              times: [0, 0.3, 0.7, 1],
+              repeatDelay: 1,
             }}
-            className="absolute z-20 w-16 md:w-28 lg:w-32 object-contain"
-            style={{ left: "35%", bottom: "16%" }}
+            className="absolute w-20 md:w-40 z-10 left-[7.5%] md:left-[10%] top-[65%] md:top-[50%] origin-bottom-left"
           />
 
           {/* Woman */}
           <motion.img
             src="/icons/woman.png"
-            alt="Woman ordering"
+            alt="Woman"
             initial={{ opacity: 0, x: 20 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="absolute bottom-0 right-4 md:right-8 z-10 w-36 md:w-56 lg:w-64 object-contain"
+            className="absolute w-48 md:w-64 z-10 right-10 md:right-30 bottom-0"
           />
 
-          {/* Speech bubble */}
+          {/* Bubble */}
           <motion.img
             src="/icons/bubble.png"
-            alt="Order bubble"
+            alt="bubble"
             animate={{ scale: [1, 1.05, 1], y: [0, -4, 0] }}
             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-            className="absolute z-20 right-[120px] md:right-[160px] bottom-[48%] md:bottom-[52%] w-12 md:w-20 object-contain"
+            className="absolute w-[60px] md:w-[100px] z-10 right-[148px] md:right-[170px] bottom-[158px] md:bottom-[205px]"
           />
 
           {/* Floating WhatsApp badge */}
